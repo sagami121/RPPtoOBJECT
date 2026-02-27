@@ -88,7 +88,7 @@ class RPPtoObjectApp(QMainWindow):
         form_grid.addWidget(self.track_combo, 2, 1)
         left.addLayout(form_grid)
 
-        left.addWidget(QLabel("追加スクリプト:"))
+        left.addWidget(QLabel("スクリプト制御:"))
         self.script_edit = QTextEdit()
         left.addWidget(self.script_edit)
 
