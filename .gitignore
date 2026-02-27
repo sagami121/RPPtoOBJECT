@@ -1,0 +1,27 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- 設定・履歴ファイル (個人環境のパスが含まれるため除外) ---
+config.json
+RPPtoOBJECT.ini
+
+# --- 出力ファイル ---
+*.object
+*.exo
+
+# --- 仮想環境 ---
+venv/
+.venv/
+env/
+
+# --- IDE / エディタ ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- OS一時ファイル ---
+Thumbs.db
+.DS_Store

@@ -41,8 +41,8 @@ class RPPtoObjectApp(QMainWindow):
         
         left.addWidget(QLabel("<b>基本設定</b>"))
         opt_grid = QGridLayout()
-        self.cb_flip_h = QCheckBox("左右交互に反転")
-        self.cb_flip_v = QCheckBox("上下交互に反転")
+        self.cb_flip_h = QCheckBox("左右反転")
+        self.cb_flip_v = QCheckBox("上下反転")
         self.cb_loop = QCheckBox("ループ再生")
         self.cb_no_gap = QCheckBox("隙間なく配置")
         self.cb_as_scene = QCheckBox("シーンとして配置")
@@ -70,7 +70,7 @@ class RPPtoObjectApp(QMainWindow):
         tc_group.setFrameShape(QFrame.Shape.StyledPanel)
         tc_group.setStyleSheet("QFrame { background-color: #333333; border: 1px solid #555555; border-radius: 4px; }")
         tc_lay = QGridLayout(tc_group)
-        self.cb_time_ctrl = QCheckBox("時間制御を付与 (0⇔100 交互)")
+        self.cb_time_ctrl = QCheckBox("時間制御")
         self.tc_step = QLineEdit("1")
         self.tc_step.setFixedWidth(40)
         
@@ -137,7 +137,7 @@ class RPPtoObjectApp(QMainWindow):
             self.load_tracks(p)
 
     def save_exo(self):
-        p, _ = QFileDialog.getSaveFileName(self, "保存", "output.object", "*.object")
+        p, _ = QFileDialog.getSaveFileName(self, "保存", "", "*.object")
         if p: self.exo_path.setText(p)
 
     def select_src(self):
