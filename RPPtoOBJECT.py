@@ -1,7 +1,6 @@
 import os
 import sys
 import math
-import random
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
                              QHBoxLayout, QGridLayout, QLabel, QLineEdit, 
                              QPushButton, QCheckBox, QComboBox, QTextEdit, 
@@ -25,7 +24,7 @@ XDict = {
 class RPPtoObjectApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("RPPtoOBJECT")
+        self.setWindowTitle("RPPtoOBJECT v1.0")
         self.setMinimumSize(1000, 750)
         self.added_effects_data = []
         self.init_ui()
@@ -42,14 +41,13 @@ class RPPtoObjectApp(QMainWindow):
         
         left.addWidget(QLabel("<b>基本設定</b>"))
         opt_grid = QGridLayout()
-        self.cb_flip_h = QCheckBox("左右反転")
-        self.cb_flip_v = QCheckBox("上下反転")
+        self.cb_flip_h = QCheckBox("左右交互に反転")
+        self.cb_flip_v = QCheckBox("上下交互に反転")
         self.cb_loop = QCheckBox("ループ再生")
         self.cb_no_gap = QCheckBox("隙間なく配置")
         self.cb_as_scene = QCheckBox("シーンとして配置")
         
         self.cb_auto_speed = QCheckBox("長さで速度変更")
-        self.cb_auto_speed.setChecked(True)
         self.base_len = QLineEdit("1.0")
         self.base_len.setFixedWidth(40)
 
@@ -72,8 +70,7 @@ class RPPtoObjectApp(QMainWindow):
         tc_group.setFrameShape(QFrame.Shape.StyledPanel)
         tc_group.setStyleSheet("QFrame { background-color: #333333; border: 1px solid #555555; border-radius: 4px; }")
         tc_lay = QGridLayout(tc_group)
-        self.cb_time_ctrl = QCheckBox("時間制御")
-        self.cb_time_ctrl.setChecked(True)
+        self.cb_time_ctrl = QCheckBox("時間制御を付与 (0⇔100 交互)")
         self.tc_step = QLineEdit("1")
         self.tc_step.setFixedWidth(40)
         
@@ -140,7 +137,7 @@ class RPPtoObjectApp(QMainWindow):
             self.load_tracks(p)
 
     def save_exo(self):
-        p, _ = QFileDialog.getSaveFileName(self, "保存", "", "*.object")
+        p, _ = QFileDialog.getSaveFileName(self, "保存", "output.object", "*.object")
         if p: self.exo_path.setText(p)
 
     def select_src(self):
@@ -230,31 +227,24 @@ class RPPtoObjectApp(QMainWindow):
             for item_num, o in enumerate(objs_to_process):
                 start_frame = round(o["pos"] * fps)
                 duration_frames = round(o["length"] * fps)
-                
                 if self.cb_no_gap.isChecked() and last_end_frame != -1:
                     if abs(start_frame - (last_end_frame + 1)) < 5: 
                         start_frame = last_end_frame + 1
-                
                 end_frame = start_frame + duration_frames - 1
                 last_end_frame = end_frame
 
                 speed = 100.0
                 if self.cb_auto_speed.isChecked():
                     raw_speed = (base_s / o["length"] * 100.0)
-                    if raw_speed <= 150: speed = 100.0
-                    else:
-                        n = round(math.log2(raw_speed / 100.0))
-                        speed = 100.0 * (2 ** max(0, n))
+                    speed = 100.0 * (2 ** max(0, round(math.log2(raw_speed / 100.0)))) if raw_speed > 150 else 100.0
 
                 output.append(f"[{total_obj_idx}]\nframe={start_frame},{end_frame}\nlayer=2\n")
                 if self.cb_as_scene.isChecked():
-
-                    output.append(f"[{total_obj_idx}.0]\neffect.name=シーン\n再生位置=1.000\n再生速度={speed:.2f}\nシーン={self.scene_in.text()}\nループ再生=0\n")
+                    output.append(f"[{total_obj_idx}.0]\neffect.name=シーン\n再生位置=1.000\n再生速度={speed:.2f}\nシーン={self.scene_in.text()}\n")
                 else:
-
-                    output.append(f"[{total_obj_idx}.0]\neffect.name=動画ファイル\nファイル={src_p}\n再生位置=0.000\n再生速度={speed:.2f}\nループ再生={int(self.cb_loop.isChecked())}\n音声付き=1\n")
+                    output.append(f"[{total_obj_idx}.0]\neffect.name=動画ファイル\nファイル={src_p}\n再生位置=0.000\n再生速度={speed:.2f}\n音声付き=1\n")
                 
-                output.append(f"[{total_obj_idx}.1]\neffect.name=標準描画\nX=0.00\nY=0.00\nZ=0.00\nGroup=1\n中心X=0.00\n中心Y=0.00\n中心Z=0.00\nX軸回転=0.00\nY軸回転=0.00\nZ軸回転=0.00\n拡大率=100.000\n縦横比=0.000\n透明度=0.00\n合成モード=通常\n")
+                output.append(f"[{total_obj_idx}.1]\neffect.name=標準描画\nX=0.00\nY=0.00\nZ=0.00\n透明度=0.00\n")
                 
                 p_idx = 2
                 if (self.cb_flip_h.isChecked() or self.cb_flip_v.isChecked()) and (item_num % 2 != 0):
@@ -275,23 +265,25 @@ class RPPtoObjectApp(QMainWindow):
                 if self.cb_time_ctrl.isChecked():
                     time_val = "100.000,0.000,直線移動,0" if item_num % 2 != 0 else "0.000,100.000,直線移動,0"
                     output.append(f"[{total_obj_idx}]\nframe={start_frame},{end_frame}\nlayer=1\n")
-                    output.append(f"[{total_obj_idx}.0]\neffect.name=時間制御(オブジェクト)\n位置={time_val}\n繰り返し=1\nコマ落ち={self.tc_step.text()}\n対象レイヤー数=1\n\n")
+                    output.append(f"[{total_obj_idx}.0]\neffect.name=時間制御(オブジェクト)\n位置={time_val}\nコマ落ち={self.tc_step.text()}\n対象レイヤー数=1\n\n")
                     total_obj_idx += 1
 
             with open(exo_p, 'w', encoding='utf-8') as f:
                 f.write("".join(output))
-            QMessageBox.information(self, "完了", f"{total_obj_idx}個のオブジェクトを出力しました。")
+
+            QMessageBox.information(self, "完了", f"オブジェクト出力が完了しました。\n{exo_p}")
+
         except Exception as e:
             QMessageBox.critical(self, "エラー", str(e))
 
 if __name__ == "__main__":
     app = QApplication(sys.argv); app.setStyle("Fusion")
-    dark_palette = QPalette()
-    dark_palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.Window, QColor(45, 45, 45))
-    dark_palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.WindowText, Qt.GlobalColor.white)
-    dark_palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.Base, QColor(30, 30, 30))
-    dark_palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.Text, Qt.GlobalColor.white)
-    dark_palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.Button, QColor(53, 53, 53))
-    dark_palette.setColor(QPalette.ColorGroup.All, QPalette.ColorRole.ButtonText, Qt.GlobalColor.white)
-    app.setPalette(dark_palette)
+    dark_p = QPalette()
+    dark_p.setColor(QPalette.ColorRole.Window, QColor(45, 45, 45))
+    dark_p.setColor(QPalette.ColorRole.WindowText, Qt.GlobalColor.white)
+    dark_p.setColor(QPalette.ColorRole.Base, QColor(30, 30, 30))
+    dark_p.setColor(QPalette.ColorRole.Text, Qt.GlobalColor.white)
+    dark_p.setColor(QPalette.ColorRole.Button, QColor(53, 53, 53))
+    dark_p.setColor(QPalette.ColorRole.ButtonText, Qt.GlobalColor.white)
+    app.setPalette(dark_p)
     win = RPPtoObjectApp(); win.show(); sys.exit(app.exec())
