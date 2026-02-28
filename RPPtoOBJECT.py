@@ -110,7 +110,7 @@ class BezierCanvas(QWidget):
 class RPPtoObjectApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("RPPtoOBJECT v1.0 Beta2")
+        self.setWindowTitle("RPPtoOBJECT v1.0beta2")
         self.setMinimumSize(1100, 800)
         self.added_effects_data = []
         self.init_ui()
