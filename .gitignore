@@ -5,7 +5,7 @@ __pycache__/
 
 # --- 設定・履歴ファイル (個人環境のパスが含まれるため除外) ---
 config.json
-RPPtoOBJECT.ini
+easing_presets.json
 
 # --- 出力ファイル ---
 *.object
