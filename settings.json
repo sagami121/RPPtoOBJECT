@@ -1,7 +1,7 @@
 {
   "version": "1.0beta3",
   "language": "ja",
-  "fps": "66",
+  "fps": "60",
   "scene_no": "1",
   "base_len_sec": "1.0",
   "play_speed_steps": [
