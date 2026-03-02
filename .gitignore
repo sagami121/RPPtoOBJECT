@@ -3,9 +3,7 @@ __pycache__/
 *$py.class
 
 
-config.json
-easing_presets.json
-
+*.json
 
 *.object
 *.exo

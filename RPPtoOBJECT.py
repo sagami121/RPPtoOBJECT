@@ -159,8 +159,15 @@ class BezierCanvas(QWidget):
 class RPPtoObjectApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.lang_dir = os.path.join(os.path.dirname(__file__), "language")
-        self.settings_path = os.path.join(os.path.dirname(__file__), "settings.json")
+        if getattr(sys, "frozen", False):
+            self.app_dir = os.path.dirname(sys.executable)
+            self.resource_dir = getattr(sys, "_MEIPASS", self.app_dir)
+        else:
+            self.app_dir = os.path.dirname(__file__)
+            self.resource_dir = self.app_dir
+
+        self.lang_dir = os.path.join(self.resource_dir, "language")
+        self.settings_path = os.path.join(self.app_dir, "settings.json")
         self.lang_code = "ja"
         self.play_speed_steps = tuple(PLAY_SPEED_STEPS)
         self.i18n = {}
