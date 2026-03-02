@@ -937,11 +937,8 @@ class RPPtoObjectApp(QMainWindow):
                     total_obj_idx += 1
 
                     if self.cb_time_ctrl.isChecked():
-                        if is_redzone:
-                            if curr_cnt % 2 == 0:
-                                s_val, e_val = "100.000", "0.000"
-                            else:
-                                s_val, e_val = "0.000", "100.000"
+                        if curr_cnt % 2 == 0:
+                            s_val, e_val = "100.000", "0.000"
                         else:
                             s_val, e_val = "0.000", "100.000"
 
